@@ -8,13 +8,18 @@
 :root{--bg:#eef1f6;--card:#fff;--tx:#1b2333;--mut:#6a7489;--bd:#e2e6ee;--ac:#2563eb;--ac-s:#e8efff;--fc:#7c3aed;--fc-s:#f1eaff;--ok:#16a34a;--sh:0 1px 2px rgba(20,30,60,.06),0 4px 14px rgba(20,30,60,.06)}
 @media (prefers-color-scheme:dark){:root{--bg:#0f131b;--card:#171c26;--tx:#e8ecf4;--mut:#939bb0;--bd:#283042;--ac:#6ea0ff;--ac-s:#1b2a48;--fc:#b794ff;--fc-s:#2b2147;--ok:#4ade80;--sh:none}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;line-height:1.5}
-header{background:linear-gradient(120deg,#2563eb 55%,#0ea5e9);color:#fff;padding:22px 16px 56px}
+body{overflow-x:hidden;margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;line-height:1.5}
+header{background:linear-gradient(120deg,#1e40af,#2563eb 55%,#0ea5e9);color:#fff;padding:22px 16px 56px}
 header .in{max-width:1100px;margin:0 auto}
 header h1{margin:0;font-size:1.5rem}
 header p{margin:4px 0 0;opacity:.85;font-size:.92rem}
 main{max-width:1100px;margin:-38px auto 24px;padding:0 16px;display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
-@media(max-width:860px){main{grid-template-columns:1fr}}
+main>*{min-width:0}
+@media(max-width:860px){main{grid-template-columns:minmax(0,1fr)}}
+.r3>div,.sum>div,.kpis>div{min-width:0}
+.card{max-width:100%}
+.fl span{white-space:nowrap}
+@media(max-width:520px){.fl span{width:64px;font-size:.7rem}.fl em{width:38px}.lab{margin-left:46px;margin-right:72px}}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:16px}
 .card h2{margin:0 0 12px;font-size:1rem}
 .side{position:sticky;top:12px}
@@ -31,7 +36,9 @@ input:focus{outline:2px solid var(--ac);outline-offset:-1px}
 .zinfo{margin-top:8px;font-size:.82rem;color:var(--mut)}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:3px}
 .seg button{border:0;background:transparent;padding:7px;border-radius:8px;cursor:pointer;font-weight:600;color:var(--mut)}
-.alloc{margin-top:14px}
+.alloc{margin-bottom:14px}
+.fh{margin-top:6px;font-size:.78rem;color:var(--mut)}
+.fh button{border:0;background:var(--ac-s);color:var(--ac);border-radius:99px;padding:2px 10px;cursor:pointer;font:inherit;font-weight:700}
 .hint{grid-column:1/-1;font-size:.78rem;color:#dc2626;margin-top:6px;min-height:0}
 .seg button.on{background:var(--card);color:var(--ac);box-shadow:var(--sh)}
 .r3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -56,20 +63,21 @@ input:focus{outline:2px solid var(--ac);outline-offset:-1px}
 .tag{display:inline-block;font-size:.75rem;padding:1px 8px;border-radius:99px;font-weight:700}
 .tag.n{background:var(--ac-s);color:var(--ac)}.tag.f{background:var(--fc-s);color:var(--fc)}
 .n{--c:var(--ac)}.f{--c:var(--fc)}
-.chart{margin-top:18px;padding:14px;background:var(--bg);border-radius:12px}
+.chart{margin:0 0 14px;padding:14px;background:var(--bg);border-radius:12px}
 .chart h3{margin:0 0 10px;font-size:.92rem}
 .meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px}
 .mt small{display:flex;justify-content:space-between;color:var(--mut);font-size:.78rem;margin-bottom:3px}
 .mt small b{color:var(--tx)}
 .mt .tk{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;position:relative}
 .mt .tk i{display:block;height:100%;background:var(--c);border-radius:6px}
-.stack{display:flex;flex-direction:column-reverse;gap:5px;padding-top:18px}
+.stack{display:flex;flex-direction:column-reverse;gap:1px;padding-top:18px}
 .fl{display:flex;align-items:center;gap:8px;font-size:.78rem}
 .fl em{width:42px;color:var(--mut);font-style:normal;text-align:right}
-.fl .tr{flex:1;height:22px;background:var(--bd);border-radius:5px;position:relative;overflow:hidden}
+.fl .tr{flex:1;min-width:0;height:22px;background:var(--bd);border-radius:3px;position:relative;overflow:hidden}
+.fl.g .tr{height:28px;border-radius:3px 3px 0 0;border-bottom:6px solid #8a6a45}
 .fl .bar{position:absolute;left:0;top:0;height:100%;background:var(--c)}
 .fl .gh{position:absolute;top:0;height:100%;background:repeating-linear-gradient(135deg,transparent 0 4px,var(--c) 4px 5px);opacity:.45}
-.fl .nb{position:absolute;top:0;right:0;height:100%;background:var(--card);opacity:.55}
+.fl .nb{position:absolute;top:0;right:0;height:100%;background:#cdcdcd;opacity:.55}
 .fl span{width:84px;text-align:right;font-variant-numeric:tabular-nums}
 .axis{position:relative;margin:0 92px 0 50px;height:0}
 .axis .lim{position:absolute;top:0;height:calc(100% + 0px);border-left:2px dashed var(--tx)}
@@ -86,13 +94,13 @@ th{color:var(--mut);font-size:.78rem;font-weight:600}
 th:first-child,td:first-child{text-align:left}
 tbody tr:hover{background:var(--bg)}
 tfoot td{font-weight:800;border-bottom:0}
-.note{margin-top:12px;font-size:.8rem;color:var(--mut)}
+.note{margin-top:3px;font-size:.8rem;color:var(--mut)}
 .hide{display:none!important}
 </style>
 </head>
 <body>
 <header><div class="in">
-  <h1>คำนวณขนาดอาคารที่สร้างได้ (BCR / FAR) ผังเมืองรวมเมืองแก่งคอย จ.สระบุรี</h1>
+  <h1>🏢 คำนวณขนาดอาคารที่สร้างได้ (BCR / FAR) ผังเมืองรวมเมืองแก่งคอย จ.สระบุรี</h1>
   <p>แยกอาคารปกติ และ อาคารโรงงาน · แสดงผลรายชั้น</p>
 </div></header>
 
@@ -116,21 +124,23 @@ tfoot td{font-weight:800;border-bottom:0}
   </div>
   <div class="area"><span>📏 พื้นที่แปลงรวม</span><b id="areaTxt"></b><span id="areaAlt"></span></div>
 
-  <label class="l">🏗️ จำนวนชั้นสูงสุด</label>
+  <label class="l">🏗️ จำนวนชั้น</label>
   <div class="step"><button id="dn">−</button><input type="number" id="floors" min="1" max="100" value="5"><button id="up">+</button></div>
+  <div class="fh" id="fh"></div>
 </aside>
 
 <section>
   <div class="sum" id="sum"></div>
   <div class="tabs"><button id="tn" class="on n">🏢 อาคารปกติ</button><button id="tf" class="f">🏭 อาคารโรงงาน</button></div>
   <div class="card" id="res"></div>
-  <p class="note">แบบเต็ม BCR ชั้นล่างก่อน: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, FAR ที่เหลือ) ชั้นบนจึงลดหลั่นและไม่เกินชั้นล่าง · แบบเฉลี่ย: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, พื้นที่ดิน × FAR ÷ จำนวนชั้น) · 1 ไร่ = 4 งาน = 400 ตร.ว. = 1,600 ตร.ม.</p>
+  <p class="note">แบบเต็ม BCR ชั้นล่างก่อน: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, FAR ที่เหลือ) ชั้นบนจึงลดหลั่นและไม่เกินชั้นล่าง
+  <BR>แบบเฉลี่ย: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, พื้นที่ดิน × FAR ÷ จำนวนชั้น) · 1 ไร่ = 4 งาน = 400 ตร.ว. = 1,600 ตร.ม.</p>
 </section>
 </main>
 
 <script>
 var FALLBACK="BL_Den,type,ย.1,ย.2,พ.1,พ.2,อ.1,อ.2,ก.1,ก.2,ก.3\nFAR,,2,3,3.5,4,1,1,0.5,1,1\nBCR,,60,65,70,70,60,60,50,50,50\nFAR,โรงงาน,0.5,0.5,0.5,0.5,1,1,0.5,0.5,0.5\nBCR,โรงงาน,50,50,50,50,60,60,50,50,50";
-var DATA=null,mode=1,zi=0,tab="n",alloc="even";
+var floorsAuto=true,DATA=null,mode=1,zi=0,tab="n",alloc="full";
 var ZC={"ย.1":["#facc15","#3b2f00"],"ย.2":["#f97316","#fff"],"อ.1":["#7c3aed","#fff"],"อ.2":["#c4b5fd","#2e1065"]};
 function zoneColor(z){
   if(ZC[z])return ZC[z];
@@ -202,8 +212,16 @@ function calcBlock(type,A,N){
   return{far:far,bcr:bcr,pb:pb,pf:pf,cap:cap,arr:arr,rem:rem,tot:tot,used:used,
     first:arr[0]||0,by:(cap-tot<=1e-6)?"FAR":"BCR"};
 }
+function maxFloors(type){
+  var far=DATA[type].FAR[zi],bcr=DATA[type].BCR[zi];
+  if(!(far>0)||!(bcr>0))return 1;
+  return Math.max(1,Math.min(100,Math.ceil(far/(bcr/100)-1e-9)));
+}
 function calc(){
   if(!DATA)return;
+  if(floorsAuto)$("floors").value=maxFloors("n");
+  var mf="ปกติ "+maxFloors("n")+" ชั้น"+(DATA.f.FAR&&DATA.f.BCR?" · โรงงาน "+maxFloors("f")+" ชั้น":"");
+  $("fh").innerHTML="💡 สูงสุดตามสิทธิ BCR/FAR: "+mf+(floorsAuto?"":' <button type="button" id="fauto">↺ ใช้ค่าสูงสุด</button>');
   var A=area(),N=Math.max(1,Math.floor(+$("floors").value||1));
   [].forEach.call($("zones").children,function(b){b.className=(+b.dataset.i===zi)?"on":""});
   $("areaTxt").textContent=fmt(A)+" ตร.ม.";
@@ -213,9 +231,9 @@ function calc(){
   $("tn").className="n"+(tab==="n"?" on":"");$("tf").className="f"+(tab==="f"?" on":"");
   var cn=calcBlock("n",A,N),cf=hasF?calcBlock("f",A,N):null;
   $("zinfo").innerHTML='ปกติ: BCR '+cn.bcr+'% · FAR '+cn.far+(cf?'<br>โรงงาน: BCR '+cf.bcr+'% · FAR '+cf.far:'');
-  $("sum").innerHTML='<div><small>🏢 อาคารปกติ รวม</small><b>'+fmt(cn.tot)+' ตร.ม.</b></div>'+
-    (cf?'<div><small>🏭 อาคารโรงงาน รวม</small><b>'+fmt(cf.tot)+' ตร.ม.</b></div>':'')+
-    '<div style="border-left:6px solid '+zoneColor(DATA.zones[zi])[0]+'"><small>🗺️ โซน / จำนวนชั้น</small><b>'+DATA.zones[zi]+' · '+N+' ชั้น</b></div>';
+  $("sum").innerHTML='<div><small>🏢 พื้นที่อาคารรวม (ปกติ)</small><b>'+fmt(cn.tot)+' ตร.ม.</b></div>'+
+    (cf?'<div><small>🏭 พื้นที่อาคารรวม (โรงงาน)</small><b>'+fmt(cf.tot)+' ตร.ม.</b></div>':'')+
+    '<div style="border-left:6px solid '+zoneColor(DATA.zones[zi])[0]+'"><small>🗺️ โซน · จำนวนชั้น</small><b>'+DATA.zones[zi]+' · '+N+' ชั้น</b></div>';
   var c=tab==="f"?cf:cn,cls=tab,full=alloc==="full";
   var pct=function(v){return A?Math.max(0,Math.min(100,v/A*100)):0};
   var wLim=Math.min(100,c.bcr),bars="",rows="",cum=0;
@@ -223,7 +241,7 @@ function calc(){
     var v=c.arr[i],w=pct(v),gh=Math.max(0,wLim-w),prev=i?c.arr[i-1]:null;
     cum+=v;
     var empty=v<=1e-9;
-    bars+='<div class="fl" title="ชั้น '+(i+1)+': '+fmt(v)+' ตร.ม."><em>ชั้น '+(i+1)+'</em><div class="tr">'+
+    bars+='<div class="fl'+(i===0?' g':'')+'" title="ชั้น '+(i+1)+': '+fmt(v)+' ตร.ม."><em>ชั้น '+(i+1)+'</em><div class="tr">'+
       '<div class="bar" style="width:'+w+'%"></div>'+
       '<div class="gh" style="left:'+w+'%;width:'+gh+'%"></div>'+
       '<div class="nb" style="width:'+(100-wLim)+'%"></div></div><span>'+(empty?'ไม่มี FAR เหลือ':fmt(v))+'</span></div>';
@@ -251,18 +269,21 @@ function calc(){
     '<div class="stack">'+bars+'</div>'+
     '<div class="lgd"><span><i style="background:var(--c)"></i>พื้นที่อาคารต่อชั้น</span>'+
     '<span><i style="background:repeating-linear-gradient(135deg,transparent 0 2px,var(--c) 2px 3px);opacity:.6"></i>สิทธิ BCR ที่ยังไม่ได้ใช้</span>'+
-    '<span><i style="background:var(--bd)"></i>นอกเขต BCR</span></div>'+
+    '<span><i style="background:#cdcdcd"></i>นอกเขต BCR</span></div>'+
     '<div class="insight">💡 '+insight+'</div></div>';
   $("res").className="card "+cls;
-  $("res").innerHTML='<h2>'+(tab==="f"?"🏭 อาคารโรงงาน":"🏢 อาคารปกติ")+' <span class="tag '+cls+'">จำกัดโดย '+c.by+'</span></h2>'+
+  $("res").innerHTML='<div class="seg alloc"><button data-al="full" class="'+(alloc==="full"?"on":"")+'">🏠 เต็ม BCR ชั้นล่างก่อน</button>'+
+   '<button data-al="even" class="'+(alloc==="even"?"on":"")+'">⚖️ เฉลี่ยเท่ากันทุกชั้น</button></div>'+
+   
+  '<h2>'+(tab==="f"?"🏭 อาคารโรงงาน":"🏢 อาคารปกติ")+' <span class="tag '+cls+'">จำกัดโดย '+c.by+'</span></h2>'+chart+
+   
    '<div class="kpis"><div><small>🧱 BCR</small><b>'+c.bcr+'%</b></div><div><small>📈 FAR</small><b>'+c.far+'</b></div>'+
    '<div><small>🏠 ชั้น 1</small><b>'+fmt(c.arr[0])+' ตร.ม.</b></div>'+
    '<div><small>🧮 รวม '+N+' ชั้น</small><b>'+fmt(c.tot)+' ตร.ม.</b></div>'+
    '<div><small>🔒 FAR สูงสุดรวม</small><b>'+fmt(c.cap)+' ตร.ม.</b></div></div>'+
-   '<div class="sc"><table><thead><tr><th>ชั้น</th><th>สิทธิ BCR (สูงสุด/ชั้น)</th><th>'+(full?'FAR คงเหลือก่อนชั้นนี้':'ตาม FAR÷ชั้น')+'</th><th>สร้างได้ (ตร.ม.)</th><th>สะสม (ตร.ม.)</th></tr></thead><tbody>'+rows+
-   '</tbody><tfoot><tr><td>รวม</td><td></td><td></td><td>'+fmt(c.tot)+'</td><td></td></tr></tfoot></table></div>'+
-   '<div class="seg alloc"><button data-al="even" class="'+(alloc==="even"?"on":"")+'">⚖️ เฉลี่ยเท่ากันทุกชั้น</button>'+
-   '<button data-al="full" class="'+(alloc==="full"?"on":"")+'">⬆️ เต็ม BCR ชั้นล่างก่อน</button></div>'+chart;
+   '<div class="sc"><table><thead><tr><th>ชั้น</th><th>สิทธิ BCR (สูงสุด/ชั้น)</th><th>'+
+   (full?'FAR คงเหลือก่อนชั้นนี้':'ตาม FAR÷ชั้น')+'</th><th>สร้างได้ (ตร.ม.)</th><th>สะสม (ตร.ม.)</th></tr></thead><tbody>'+rows+
+   '</tbody><tfoot><tr><td>รวม</td><td></td><td></td><td>'+fmt(c.tot)+'</td><td></td></tr></tfoot></table></div>';
 }
 function setMode(m){
   if(m===2&&mode===1)$("sqm").value=+area().toFixed(2);
@@ -273,8 +294,10 @@ function setMode(m){
 $("m1").onclick=function(){setMode(1)};$("m2").onclick=function(){setMode(2)};
 $("res").onclick=function(e){var b=e.target.closest("button[data-al]");if(b){alloc=b.dataset.al;calc()}};
 $("tn").onclick=function(){tab="n";calc()};$("tf").onclick=function(){tab="f";calc()};
-$("dn").onclick=function(){$("floors").value=Math.max(1,(+$("floors").value||1)-1);calc()};
-$("up").onclick=function(){$("floors").value=Math.min(100,(+$("floors").value||1)+1);calc()};
+$("fh").onclick=function(e){if(e.target.id==="fauto"){floorsAuto=true;calc()}};
+$("dn").onclick=function(){floorsAuto=false;$("floors").value=Math.max(1,(+$("floors").value||1)-1);calc()};
+$("up").onclick=function(){floorsAuto=false;$("floors").value=Math.min(100,(+$("floors").value||1)+1);calc()};
+$("floors").addEventListener("input",function(){floorsAuto=false});
 ["rai","ngan","wa","sqm","floors"].forEach(function(i){$(i).addEventListener("input",calc)});
 ["ngan","wa"].forEach(function(i){$(i).addEventListener("change",function(){
   var p=readPlot();$("ngan").value=p.n;$("wa").value=p.w;$("hint").textContent="";calc();
