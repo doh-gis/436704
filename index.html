@@ -133,8 +133,9 @@ tfoot td{font-weight:800;border-bottom:0}
   <div class="sum" id="sum"></div>
   <div class="tabs"><button id="tn" class="on n">🏢 อาคารทั่วไป</button><button id="tf" class="f">🏭 อาคารโรงงาน</button></div>
   <div class="card" id="res"></div>
-  <p class="note">แบบเต็ม BCR ชั้นล่างก่อน: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, FAR ที่เหลือ) ชั้นบนจึงลดหลั่นและไม่เกินชั้นล่าง
-  <BR>แบบเฉลี่ย: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, พื้นที่ดิน × FAR ÷ จำนวนชั้น) · 1 ไร่ = 4 งาน = 400 ตร.ว. = 1,600 ตร.ม.</p>
+  <p class="note"><u>แบบเต็ม BCR :</u> พื้นที่ต่อชั้น คือ พื้นที่น้อยสุดระหว่าง <i>พื้นที่แปลง × BCR ÷ 100</i> กับ <i>พื้นที่คำนวณจาก FAR ที่ไม่เกิน BCR</i>
+  <BR><u>แบบเฉลี่ย:</u> พื้นที่ต่อชั้น คือ พื้นที่น้อยสุดระหว่าง <i>พื้นที่แปลง × BCR ÷ 100</i> กับ <i>พื้นที่แปลง × FAR ÷ จำนวนชั้น) </i>
+  <BR>1 ไร่ = 4 งาน = 400 ตร.ว. = 1,600 ตร.ม.</p>
 </section>
 </main>
 
@@ -258,7 +259,7 @@ function calc(){
   }else{
     insight=c.by==="BCR"
       ? 'ชั้นละ <b>'+fmt(c.arr[0])+' ตร.ม.</b> เต็มสิทธิ BCR แต่ใช้ FAR เพียง '+fmt(fu,1)+'% — เพิ่มได้ถึงประมาณ <b>'+fmt(nFull,1)+' ชั้น</b>'
-      : 'ใช้ FAR ครบ แต่แต่ละชั้นใช้ BCR เพียง '+fmt(cov,1)+'% จาก '+c.bcr+'% — ลองสลับเป็น "เต็ม BCR ชั้นล่างก่อน" เพื่อเพิ่มพื้นที่ชั้นล่างและลดชั้นบน';
+      : 'ใช้ FAR ครบ แต่แต่ละชั้นใช้ BCR เพียง '+fmt(cov,1)+'% จาก '+c.bcr+'% — ลองสลับเป็น "🏠 เต็ม BCR" เพื่อเพิ่มพื้นที่ชั้นล่างและลดชั้นบน';
   }
   var chart='<div class="chart"><h3>📊 สัดส่วนอาคารเทียบกับแปลงที่ดิน</h3>'+
     '<div class="meters">'+
@@ -272,7 +273,7 @@ function calc(){
     '<span><i style="background:#cdcdcd"></i>นอกเขต BCR</span></div>'+
     '<div class="insight">💡 '+insight+'</div></div>';
   $("res").className="card "+cls;
-  $("res").innerHTML='<div class="seg alloc"><button data-al="full" class="'+(alloc==="full"?"on":"")+'">🏠 เต็ม BCR ชั้นล่างก่อน</button>'+
+  $("res").innerHTML='<div class="seg alloc"><button data-al="full" class="'+(alloc==="full"?"on":"")+'">🏠 เต็ม BCR</button>'+
    '<button data-al="even" class="'+(alloc==="even"?"on":"")+'">⚖️ เฉลี่ยเท่ากันทุกชั้น</button></div>'+
    
   '<h2>'+(tab==="f"?"🏭 อาคารโรงงาน":"🏢 อาคารทั่วไป")+' <span class="tag '+cls+'">จำกัดโดย '+c.by+'</span></h2>'+chart+
