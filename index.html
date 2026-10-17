@@ -78,10 +78,10 @@ input:focus{outline:2px solid var(--ac);outline-offset:-1px}
 .fl .bar{position:absolute;left:0;top:0;height:100%;background:var(--c)}
 .fl .gh{position:absolute;top:0;height:100%;background:repeating-linear-gradient(135deg,transparent 0 4px,var(--c) 4px 5px);opacity:.45}
 .fl .nb{position:absolute;top:0;right:0;height:100%;background:#cdcdcd;opacity:.55}
-.fl span{width:84px;text-align:right;font-variant-numeric:tabular-nums}
+.fl span{width:64px;text-align:right;font-variant-numeric:tabular-nums}
 .axis{position:relative;margin:0 92px 0 50px;height:0}
 .axis .lim{position:absolute;top:0;height:calc(100% + 0px);border-left:2px dashed var(--tx)}
-.lab{position:relative;margin:0 92px 4px 50px;height:16px;font-size:.72rem;color:var(--mut)}
+.lab{position:relative;margin:0 72px 0px 50px;height:16px;font-size:.72rem;color:var(--mut)}
 .lab b{position:absolute;transform:translateX(-50%);white-space:nowrap;color:var(--tx)}
 .lab u{position:absolute;right:0;text-decoration:none}
 .lgd{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:.76rem;color:var(--mut)}
@@ -101,7 +101,7 @@ tfoot td{font-weight:800;border-bottom:0}
 <body>
 <header><div class="in">
   <h1>🏢 คำนวณขนาดอาคารที่สร้างได้ (BCR / FAR) ผังเมืองรวมเมืองแก่งคอย จ.สระบุรี</h1>
-  <p>แยกอาคารปกติ และ อาคารโรงงาน · แสดงผลรายชั้น</p>
+  <p>แยกอาคารทั่วไป และอาคารโรงงาน · แสดงผลรายชั้น</p>
 </div></header>
 
 <main>
@@ -131,7 +131,7 @@ tfoot td{font-weight:800;border-bottom:0}
 
 <section>
   <div class="sum" id="sum"></div>
-  <div class="tabs"><button id="tn" class="on n">🏢 อาคารปกติ</button><button id="tf" class="f">🏭 อาคารโรงงาน</button></div>
+  <div class="tabs"><button id="tn" class="on n">🏢 อาคารทั่วไป</button><button id="tf" class="f">🏭 อาคารโรงงาน</button></div>
   <div class="card" id="res"></div>
   <p class="note">แบบเต็ม BCR ชั้นล่างก่อน: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, FAR ที่เหลือ) ชั้นบนจึงลดหลั่นและไม่เกินชั้นล่าง
   <BR>แบบเฉลี่ย: ชั้นละ = min(พื้นที่ดิน × BCR ÷ 100, พื้นที่ดิน × FAR ÷ จำนวนชั้น) · 1 ไร่ = 4 งาน = 400 ตร.ว. = 1,600 ตร.ม.</p>
@@ -220,7 +220,7 @@ function maxFloors(type){
 function calc(){
   if(!DATA)return;
   if(floorsAuto)$("floors").value=maxFloors("n");
-  var mf="ปกติ "+maxFloors("n")+" ชั้น"+(DATA.f.FAR&&DATA.f.BCR?" · โรงงาน "+maxFloors("f")+" ชั้น":"");
+  var mf="ทั่วไป "+maxFloors("n")+" ชั้น"+(DATA.f.FAR&&DATA.f.BCR?" · โรงงาน "+maxFloors("f")+" ชั้น":"");
   $("fh").innerHTML="💡 สูงสุดตามสิทธิ BCR/FAR: "+mf+(floorsAuto?"":' <button type="button" id="fauto">↺ ใช้ค่าสูงสุด</button>');
   var A=area(),N=Math.max(1,Math.floor(+$("floors").value||1));
   [].forEach.call($("zones").children,function(b){b.className=(+b.dataset.i===zi)?"on":""});
@@ -230,8 +230,8 @@ function calc(){
   $("tf").classList.toggle("hide",!hasF);if(!hasF)tab="n";
   $("tn").className="n"+(tab==="n"?" on":"");$("tf").className="f"+(tab==="f"?" on":"");
   var cn=calcBlock("n",A,N),cf=hasF?calcBlock("f",A,N):null;
-  $("zinfo").innerHTML='ปกติ: BCR '+cn.bcr+'% · FAR '+cn.far+(cf?'<br>โรงงาน: BCR '+cf.bcr+'% · FAR '+cf.far:'');
-  $("sum").innerHTML='<div><small>🏢 พื้นที่อาคารรวม (ปกติ)</small><b>'+fmt(cn.tot)+' ตร.ม.</b></div>'+
+  $("zinfo").innerHTML='ทั่วไป: BCR '+cn.bcr+'% · FAR '+cn.far+(cf?'<br>โรงงาน: BCR '+cf.bcr+'% · FAR '+cf.far:'');
+  $("sum").innerHTML='<div><small>🏢 พื้นที่อาคารรวม (ทั่วไป)</small><b>'+fmt(cn.tot)+' ตร.ม.</b></div>'+
     (cf?'<div><small>🏭 พื้นที่อาคารรวม (โรงงาน)</small><b>'+fmt(cf.tot)+' ตร.ม.</b></div>':'')+
     '<div style="border-left:6px solid '+zoneColor(DATA.zones[zi])[0]+'"><small>🗺️ โซน · จำนวนชั้น</small><b>'+DATA.zones[zi]+' · '+N+' ชั้น</b></div>';
   var c=tab==="f"?cf:cn,cls=tab,full=alloc==="full";
@@ -265,7 +265,7 @@ function calc(){
     '<div class="mt"><small><span>🏗️ พื้นที่ปกคลุมดิน (ชั้น 1)</span><b>'+fmt(cov,1)+'% / '+c.bcr+'%</b></small><div class="tk"><i style="width:'+(c.bcr?Math.min(100,cov/c.bcr*100):0)+'%"></i></div></div>'+
     '<div class="mt"><small><span>📈 การใช้สิทธิ FAR (รวมทุกชั้น)</span><b>'+fmt(fu,1)+'%</b></small><div class="tk"><i style="width:'+Math.min(100,fu)+'%"></i></div></div>'+
     '<div class="mt"><small><span>🌳 พื้นที่ว่างของแปลง</span><b>'+fmt(open,1)+'% · '+fmt(A-c.first)+' ตร.ม.</b></small><div class="tk"><i style="width:'+Math.min(100,open)+'%;opacity:.45"></i></div></div></div>'+
-    '<div class="lab"><b style="left:'+wLim+'%">▼ BCR '+c.bcr+'%</b><u>100% ของแปลง</u></div>'+
+    '<div class="lab"><b style="left:'+wLim+'%;text-align:center">BCR '+c.bcr+'%<br>▼</b><u> </u></div>'+
     '<div class="stack">'+bars+'</div>'+
     '<div class="lgd"><span><i style="background:var(--c)"></i>พื้นที่อาคารต่อชั้น</span>'+
     '<span><i style="background:repeating-linear-gradient(135deg,transparent 0 2px,var(--c) 2px 3px);opacity:.6"></i>สิทธิ BCR ที่ยังไม่ได้ใช้</span>'+
@@ -275,7 +275,7 @@ function calc(){
   $("res").innerHTML='<div class="seg alloc"><button data-al="full" class="'+(alloc==="full"?"on":"")+'">🏠 เต็ม BCR ชั้นล่างก่อน</button>'+
    '<button data-al="even" class="'+(alloc==="even"?"on":"")+'">⚖️ เฉลี่ยเท่ากันทุกชั้น</button></div>'+
    
-  '<h2>'+(tab==="f"?"🏭 อาคารโรงงาน":"🏢 อาคารปกติ")+' <span class="tag '+cls+'">จำกัดโดย '+c.by+'</span></h2>'+chart+
+  '<h2>'+(tab==="f"?"🏭 อาคารโรงงาน":"🏢 อาคารทั่วไป")+' <span class="tag '+cls+'">จำกัดโดย '+c.by+'</span></h2>'+chart+
    
    '<div class="kpis"><div><small>🧱 BCR</small><b>'+c.bcr+'%</b></div><div><small>📈 FAR</small><b>'+c.far+'</b></div>'+
    '<div><small>🏠 ชั้น 1</small><b>'+fmt(c.arr[0])+' ตร.ม.</b></div>'+
