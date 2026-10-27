@@ -96,6 +96,11 @@ tbody tr:hover{background:var(--bg)}
 tfoot td{font-weight:800;border-bottom:0}
 .note{margin-top:3px;font-size:.8rem;color:var(--mut)}
 .hide{display:none!important}
+
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.r2>div{min-width:0}
+.r2 span{display:block;font-size:.75rem;color:var(--mut);margin-bottom:3px}
+.fl .ub{position:absolute;top:0;height:100%;background:repeating-linear-gradient(45deg,#f59e0b 0 4px,#fbbf24 4px 8px);opacity:.6}
 </style>
 </head>
 <body>
@@ -124,7 +129,16 @@ tfoot td{font-weight:800;border-bottom:0}
     <div id="p2" class="hide"><input type="number" id="sqm" min="0" step="any" value="1600"></div>
   </div>
   <div class="area"><span>📏 พื้นที่แปลงรวม</span><b id="areaTxt"></b><span id="areaAlt"></span></div>
-
+<label class="l" style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="hasOther" style="width:16px;height:16px;margin:0;cursor:pointer">🏘️ มีอาคารอื่นในแปลงเดียวกัน</label>
+<div id="otherBox" class="hide" style="margin-top:10px">
+  <div class="fh" style="margin:0 0 6px">สิทธิที่ใช้ไปแล้วโดยอาคารอื่น</div>
+  <div class="r2">
+    <div><span>พื้นที่ใช้สอยรวม (ตร.ม.)</span><input type="number" id="usedFar" min="0" step="any" value="0"></div>
+    <div><span>พื้นที่อาคารคุมดิน (ตร.ม.)</span><input type="number" id="usedBcr" min="0" step="any" value="0"></div>
+  </div>
+  <div id="usedHint" class="hint"></div>
+</div>
+  
   <label class="l">🏗️ จำนวนชั้น</label>
   <div class="step"><button id="dn">−</button><input type="number" id="floors" min="1" max="100" value="5"><button id="up">+</button></div>
   <div class="fh" id="fh"></div>
@@ -204,41 +218,66 @@ function area(){
   return p.r*1600+p.n*400+p.w*4;
 }
 function raiStr(s){var q=splitArea(s);return q[0]+" ไร่ "+q[1]+" งาน "+fmt(q[2])+" ตร.ว."}
-function calcBlock(type,A,N){
+
+var hasOther=false;
+function used(){
+  if(!hasOther)return{f:0,b:0};
+  return{f:Math.max(0,+$("usedFar").value||0),b:Math.max(0,+$("usedBcr").value||0)};
+}
+$("hasOther").onchange=function(){
+  hasOther=this.checked;
+  $("otherBox").classList.toggle("hide",!hasOther);
+  calc();
+};
+function calcBlock(type,A,N,U){
   var far=DATA[type].FAR[zi],bcr=DATA[type].BCR[zi];
-  var pb=A*bcr/100,cap=A*far,pf=A*far/N,arr=[],rem=[],r=cap,i;
+  var capFull=A*far,pbFull=A*bcr/100;
+  var cap=Math.max(0,capFull-U.f),pb=Math.max(0,pbFull-U.b),pf=cap/N,arr=[],rem=[],r=cap,i;
   if(alloc==="even"){var e=Math.min(pb,pf);for(i=0;i<N;i++){rem.push(r);arr.push(e);r-=e;}}
   else{for(i=0;i<N;i++){var v=Math.max(0,Math.min(pb,r));rem.push(r);arr.push(v);r-=v;}}
   var tot=arr.reduce(function(a,b){return a+b},0);
   var used=arr.filter(function(v){return v>1e-9}).length;
-  return{far:far,bcr:bcr,pb:pb,pf:pf,cap:cap,arr:arr,rem:rem,tot:tot,used:used,
+  return{far:far,bcr:bcr,pb:pb,pf:pf,cap:cap,capFull:capFull,pbFull:pbFull,arr:arr,rem:rem,tot:tot,used:used,
     first:arr[0]||0,by:(cap-tot<=1e-6)?"FAR":"BCR"};
 }
-function maxFloors(type){
+function maxFloors(type,A,U){
   var far=DATA[type].FAR[zi],bcr=DATA[type].BCR[zi];
   if(!(far>0)||!(bcr>0))return 1;
-  return Math.max(1,Math.min(100,Math.ceil(far/(bcr/100)-1e-9)));
+  var cap=Math.max(0,A*far-U.f),pb=Math.max(0,A*bcr/100-U.b);
+  if(!(cap>0)||!(pb>0))return 1;
+  return Math.max(1,Math.min(100,Math.ceil(cap/pb-1e-9)));
 }
+
 function calc(){
   if(!DATA)return;
-  if(floorsAuto)$("floors").value=maxFloors("n");
-  var mf="ทั่วไป "+maxFloors("n")+" ชั้น"+(DATA.f.FAR&&DATA.f.BCR?" · โรงงาน "+maxFloors("f")+" ชั้น":"");
-  $("fh").innerHTML="💡 สูงสุดตามสิทธิ BCR/FAR: "+mf+(floorsAuto?"":' <button type="button" id="fauto">↺ ใช้ค่าสูงสุด</button>');
-  var A=area(),N=Math.max(1,Math.floor(+$("floors").value||1));
+  var A=area(),U=used();
+  if(floorsAuto)$("floors").value=maxFloors("n",A,U);
+  var mf="ทั่วไป "+maxFloors("n",A,U)+" ชั้น"+(DATA.f.FAR&&DATA.f.BCR?" · โรงงาน "+maxFloors("f",A,U)+" ชั้น":"");
+  $("fh").innerHTML="💡 สูงสุดตามสิทธิ BCR/FAR ที่เหลือ: "+mf+(floorsAuto?"":' <button type="button" id="fauto">↺ ใช้ค่าสูงสุด</button>');
+  var N=Math.max(1,Math.floor(+$("floors").value||1));
   [].forEach.call($("zones").children,function(b){b.className=(+b.dataset.i===zi)?"on":""});
   $("areaTxt").textContent=fmt(A)+" ตร.ม.";
   $("areaAlt").textContent="= "+raiStr(A);
   var hasF=DATA.f.FAR&&DATA.f.BCR;
   $("tf").classList.toggle("hide",!hasF);if(!hasF)tab="n";
   $("tn").className="n"+(tab==="n"?" on":"");$("tf").className="f"+(tab==="f"?" on":"");
-  var cn=calcBlock("n",A,N),cf=hasF?calcBlock("f",A,N):null;
-  $("zinfo").innerHTML='ทั่วไป: BCR '+cn.bcr+'% · FAR '+cn.far+(cf?'<br>โรงงาน: BCR '+cf.bcr+'% · FAR '+cf.far:'');
+var cn=calcBlock("n",A,N,U),cf=hasF?calcBlock("f",A,N,U):null;
+var wm=[];
+if(U.b>U.f)wm.push("พื้นที่คุมดินต้องไม่มากกว่าพื้นที่ใช้สอยรวม");
+if(U.f>cn.capFull+1e-9)wm.push("พื้นที่ใช้สอยเดิมเกินสิทธิ FAR");
+if(U.b>cn.pbFull+1e-9)wm.push("พื้นที่คุมดินเดิมเกินสิทธิ BCR");
+$("usedHint").textContent=wm.join(" · ");
+$("zinfo").innerHTML='ทั่วไป: BCR '+cn.bcr+'% · FAR '+cn.far+'<br>&nbsp;&nbsp;↳ เหลือ: คุมดิน '+fmt(cn.pb)+' · ใช้สอย '+fmt(cn.cap)+' ตร.ม.'+
+  (cf?'<br>โรงงาน: BCR '+cf.bcr+'% · FAR '+cf.far+'<br>&nbsp;&nbsp;↳ เหลือ: คุมดิน '+fmt(cf.pb)+' · ใช้สอย '+fmt(cf.cap)+' ตร.ม.':'');
   $("sum").innerHTML='<div><small>🏢 พื้นที่อาคารรวม (ทั่วไป)</small><b>'+fmt(cn.tot)+' ตร.ม.</b></div>'+
     (cf?'<div><small>🏭 พื้นที่อาคารรวม (โรงงาน)</small><b>'+fmt(cf.tot)+' ตร.ม.</b></div>':'')+
     '<div style="border-left:6px solid '+zoneColor(DATA.zones[zi])[0]+'"><small>🗺️ โซน · จำนวนชั้น</small><b>'+DATA.zones[zi]+' · '+N+' ชั้น</b></div>';
   var c=tab==="f"?cf:cn,cls=tab,full=alloc==="full";
   var pct=function(v){return A?Math.max(0,Math.min(100,v/A*100)):0};
-  var wLim=Math.min(100,c.bcr),bars="",rows="",cum=0;
+var bcrFull=Math.min(100,c.bcr);
+var wLim=A?Math.min(100,c.pb/A*100):0;
+var ubW=A?Math.min(Math.max(0,bcrFull-wLim),U.b/A*100):0;
+var bars="",rows="",cum=0;
   for(var i=0;i<N;i++){
     var v=c.arr[i],w=pct(v),gh=Math.max(0,wLim-w),prev=i?c.arr[i-1]:null;
     cum+=v;
@@ -246,31 +285,36 @@ function calc(){
     bars+='<div class="fl'+(i===0?' g':'')+'" title="ชั้น '+(i+1)+': '+fmt(v)+' ตร.ม."><em>ชั้น '+(i+1)+'</em><div class="tr">'+
       '<div class="bar" style="width:'+w+'%"></div>'+
       '<div class="gh" style="left:'+w+'%;width:'+gh+'%"></div>'+
-      '<div class="nb" style="width:'+(100-wLim)+'%"></div></div><span>'+(empty?'ไม่มี FAR เหลือ':fmt(v))+'</span></div>';
+'<div class="ub" style="left:'+wLim+'%;width:'+ubW+'%"></div>'+
+'<div class="nb" style="width:'+(100-bcrFull)+'%"></div></div><span>'+(empty?'ไม่มี FAR เหลือ':fmt(v))+'</span></div>';
     rows+='<tr'+(empty?' style="opacity:.45"':'')+'><td>ชั้น '+(i+1)+'</td><td>'+fmt(c.pb)+'</td>'+
       '<td>'+(full?fmt(c.rem[i]):fmt(c.pf))+'</td><td><b>'+fmt(v)+'</b></td><td>'+fmt(cum)+'</td></tr>';
   }
-  var cov=A?c.first/A*100:0,fu=c.cap?c.tot/c.cap*100:0,open=100-cov;
-  var nFull=c.bcr>0?c.far/(c.bcr/100):0,k=c.used,last=c.arr[k-1]||0,fullFloors=Math.floor(c.cap/(c.pb||1)+1e-9);
+var cov=A?c.first/A*100:0,fu=c.cap?c.tot/c.cap*100:0;
+var covAll=A?(U.b+c.first)/A*100:0,fuAll=c.capFull?(U.f+c.tot)/c.capFull*100:0;
+var open=A?Math.max(0,A-U.b-c.first)/A*100:0,openA=Math.max(0,A-U.b-c.first);
+var nFull=c.pb>0?c.cap/c.pb:0,k=c.used,last=c.arr[k-1]||0,fullFloors=Math.floor(c.cap/(c.pb||1)+1e-9);
   var insight;
-  if(full){
+if(c.cap<=1e-9||c.pb<=1e-9)insight='ไม่เหลือสิทธิ '+(c.cap<=1e-9?'FAR':'BCR')+' สำหรับอาคารใหม่ (หลังหักอาคารอื่นในแปลงแล้ว)';
+else if(full){
     if(c.by==="BCR")insight='ทุกชั้นได้เต็ม BCR ชั้นละ <b>'+fmt(c.pb)+' ตร.ม.</b> แต่ FAR ยังเหลือ <b>'+fmt(c.cap-c.tot)+' ตร.ม.</b> — เพิ่มได้ถึงประมาณ <b>'+fmt(nFull,1)+' ชั้น</b>';
     else if(k<N)insight='ใช้ FAR ครบที่ <b>'+k+' ชั้น</b> (ชั้น 1–'+fullFloors+' เต็ม BCR'+(last<c.pb-1e-6?' และชั้น '+k+' เหลือ '+fmt(last)+' ตร.ม.':'')+') ชั้น '+(k+1)+' ขึ้นไปไม่มีพื้นที่เหลือ จึงตั้งจำนวนชั้นเพียง '+k+' ก็เพียงพอ';
     else insight='ชั้น 1–'+fullFloors+' เต็ม BCR และชั้น '+k+' ลดลงเหลือ <b>'+fmt(last)+' ตร.ม.</b> รวมครบ FAR พอดี ('+fmt(c.cap)+' ตร.ม.) โดยทุกชั้นไม่เกินชั้นล่าง';
   }else{
     insight=c.by==="BCR"
-      ? 'ชั้นละ <b>'+fmt(c.arr[0])+' ตร.ม.</b> เต็มสิทธิ BCR แต่ใช้ FAR เพียง '+fmt(fu,1)+'% — เพิ่มได้ถึงประมาณ <b>'+fmt(nFull,1)+' ชั้น</b>'
-      : 'ใช้ FAR ครบ แต่แต่ละชั้นใช้ BCR เพียง '+fmt(cov,1)+'% จาก '+c.bcr+'% — ลองสลับเป็น "🏠 เต็ม BCR" เพื่อเพิ่มพื้นที่ชั้นล่างและลดชั้นบน';
+      ? 'ชั้นละ <b>'+fmt(c.arr[0])+' ตร.ม.</b> เต็มสิทธิ BCR แต่ใช้สิทธิ FAR ที่เหลือเพียง '+fmt(fu,1)+'% — เพิ่มได้ถึงประมาณ <b>'+fmt(nFull,1)+' ชั้น</b>'
+      : 'ใช้ FAR ครบ แต่ว่าแต่ละชั้นใช้ BCR เพียง '+fmt(cov,1)+'% จาก '+fmt(wLim,1)+'% ที่เหลือ — ลองสลับเป็น "🏠 เต็ม BCR" เพื่อเพิ่มพื้นที่ชั้นล่างและลดชั้นบน';
   }
   var chart='<div class="chart"><h3>📊 สัดส่วนอาคารเทียบกับแปลงที่ดิน</h3>'+
     '<div class="meters">'+
-    '<div class="mt"><small><span>🏗️ พื้นที่ปกคลุมดิน (ชั้น 1)</span><b>'+fmt(cov,1)+'% / '+c.bcr+'%</b></small><div class="tk"><i style="width:'+(c.bcr?Math.min(100,cov/c.bcr*100):0)+'%"></i></div></div>'+
-    '<div class="mt"><small><span>📈 การใช้สิทธิ FAR (รวมทุกชั้น)</span><b>'+fmt(fu,1)+'%</b></small><div class="tk"><i style="width:'+Math.min(100,fu)+'%"></i></div></div>'+
-    '<div class="mt"><small><span>🌳 พื้นที่ว่างของแปลง</span><b>'+fmt(open,1)+'% · '+fmt(A-c.first)+' ตร.ม.</b></small><div class="tk"><i style="width:'+Math.min(100,open)+'%;opacity:.45"></i></div></div></div>'+
-    '<div class="lab"><b style="left:'+wLim+'%;text-align:center">BCR '+c.bcr+'%<br>▼</b><u>ตร.ม.</u></div>'+
+'<div class="mt"><small><span>🏗️ พื้นที่ปกคลุมดินรวมอาคารอื่น (ชั้น 1)</span><b>'+fmt(covAll,1)+'% / '+c.bcr+'%</b></small><div class="tk"><i style="width:'+(c.bcr?Math.min(100,covAll/c.bcr*100):0)+'%"></i></div></div>'+
+'<div class="mt"><small><span>📈 การใช้สิทธิ FAR รวมอาคารอื่น</span><b>'+fmt(fuAll,1)+'%</b></small><div class="tk"><i style="width:'+Math.min(100,fuAll)+'%"></i></div></div>'+
+'<div class="mt"><small><span>🌳 พื้นที่ว่างของแปลง</span><b>'+fmt(open,1)+'% · '+fmt(openA)+' ตร.ม.</b></small><div class="tk"><i style="width:'+Math.min(100,open)+'%;opacity:.45"></i></div></div></div>'+'%;opacity:.45"></i></div></div></div>'+
+'<div class="lab"><b style="left:'+wLim+'%;text-align:center">BCR เหลือ '+fmt(wLim,1)+'%<br>▼</b><u>ตร.ม.</u></div>'+
     '<div class="stack">'+bars+'</div>'+
     '<div class="lgd"><span><i style="background:var(--c)"></i>พื้นที่อาคารต่อชั้น</span>'+
     '<span><i style="background:repeating-linear-gradient(135deg,transparent 0 2px,var(--c) 2px 3px);opacity:.6"></i>สิทธิ BCR ที่ยังไม่ได้ใช้</span>'+
+'<span><i style="background:repeating-linear-gradient(45deg,#f59e0b 0 2px,#fbbf24 2px 4px);opacity:.7"></i>ใช้ไปแล้วโดยอาคารอื่น</span>'+
     '<span><i style="background:#cdcdcd"></i>นอกเขต BCR</span></div>'+
     '<div class="insight">💡 '+insight+'</div></div>';
   $("res").className="card "+cls;
@@ -282,8 +326,9 @@ function calc(){
    '<div class="kpis"><div><small>🧱 BCR</small><b>'+c.bcr+'%</b></div><div><small>📈 FAR</small><b>'+c.far+'</b></div>'+
    '<div><small>🏠 ชั้น 1</small><b>'+fmt(c.arr[0])+' ตร.ม.</b></div>'+
    '<div><small>🧮 รวม '+N+' ชั้น</small><b>'+fmt(c.tot)+' ตร.ม.</b></div>'+
-   '<div><small>🔒 FAR สูงสุดรวม</small><b>'+fmt(c.cap)+' ตร.ม.</b></div></div>'+
-   '<div class="sc"><table><thead><tr><th>ชั้น</th><th>สิทธิ BCR (สูงสุด/ชั้น)</th><th>'+
+'<div><small>🧱 BCR คงเหลือ (ชั้น 1)</small><b>'+fmt(c.pb)+' ตร.ม.</b></div>'+
+'<div><small>🔒 FAR คงเหลือรวม</small><b>'+fmt(c.cap)+' ตร.ม.</b></div></div>'+
+   '<div class="sc"><table><thead><tr><th>ชั้น</th><th>สิทธิ BCR คงเหลือ (สูงสุด/ชั้น)</th><th>'+
    (full?'FAR คงเหลือก่อนชั้นนี้':'ตาม FAR÷ชั้น')+'</th><th>สร้างได้ (ตร.ม.)</th><th>สะสม (ตร.ม.)</th></tr></thead><tbody>'+rows+
    '</tbody><tfoot><tr><td>รวม</td><td></td><td></td><td>'+fmt(c.tot)+'</td><td></td></tr></tfoot></table></div>';
 }
@@ -300,7 +345,7 @@ $("fh").onclick=function(e){if(e.target.id==="fauto"){floorsAuto=true;calc()}};
 $("dn").onclick=function(){floorsAuto=false;$("floors").value=Math.max(1,(+$("floors").value||1)-1);calc()};
 $("up").onclick=function(){floorsAuto=false;$("floors").value=Math.min(100,(+$("floors").value||1)+1);calc()};
 $("floors").addEventListener("input",function(){floorsAuto=false});
-["rai","ngan","wa","sqm","floors"].forEach(function(i){$(i).addEventListener("input",calc)});
+["rai","ngan","wa","sqm","floors","usedFar","usedBcr"].forEach(function(i){$(i).addEventListener("input",calc)});
 ["ngan","wa"].forEach(function(i){$(i).addEventListener("change",function(){
   var p=readPlot();$("ngan").value=p.n;$("wa").value=p.w;$("hint").textContent="";calc();
 })});
