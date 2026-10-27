@@ -1,0 +1,46 @@
+/* ปุ่มเปิดแผนที่ (อยู่แถวเดียวกับหัวข้อสีผังเมือง) */
+.mapbtn{margin:0;padding:0;border:0;background:none;color:var(--ac);cursor:pointer;font:inherit;font-size:.8rem;font-weight:700;white-space:nowrap}
+.mapbtn:hover{text-decoration:underline}
+
+/* popup ลอยทับหน้าหลัก */
+.mm-back{position:fixed;inset:0;z-index:10000;background:rgba(10,15,30,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.mm-back.hide{display:none}
+.mm-box{width:min(1000px,100%);height:min(720px,100%);background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.mm-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.mm-head h3{margin:0;font-size:1rem;flex:1}
+.mm-head button{border:0;background:var(--bg);color:var(--tx);width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer}
+.mm-warn{margin:0;padding:6px 14px;font-size:.8rem;color:#ff6b6b;border-top:1px solid var(--bd)}
+.mm-map{flex:1;min-height:0;isolation:isolate}
+.mm-picker{background:#fff;padding:4px;max-width:200px}
+.mm-picker input{font-size:.75rem;width:100%;color:#1b2333}
+
+/* label ของ feature (PL_BLOCK) */
+.leaflet-tooltip.mm-lbl{background:none;border:0;box-shadow:none;padding:0;color:#000;font-weight:700;font-size:.72rem;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
+.leaflet-tooltip.mm-lbl:before{display:none}
+.mm-map:not(.mm-showlbl) .mm-lbl{display:none}
+
+/* เครื่องมือค้นหา lat,long */
+.mm-search{display:flex;background:#fff;padding:3px;gap:3px;align-items:center}
+.mm-search .bd{display:flex;gap:3px;align-items:center}
+.mm-search.col .bd{display:none}
+.mm-search.col{padding:0}
+.mm-search .tg{background:#fff}
+.mm-search.one .la,.mm-search.one .lo{display:none}
+.mm-search:not(.one) .ll{display:none}
+.mm-search .ll{width:170px}
+.mm-search .sw{background:#f1f5f9}
+.mm-search input{width:78px;padding:5px 7px;border:1px solid #cfd5e1;border-radius:6px;font-size:.8rem;color:#1b2333;background:#fff}
+.mm-search input.err{border-color:#dc2626;outline:2px solid #dc2626}
+.mm-search button{width:30px;height:30px;border:0;border-radius:6px;background:#e8efff;color:#1b2333;cursor:pointer;font-size:.9rem}
+.mm-search button.clr{background:#fee2e2}
+
+/* popup ของ feature: กว้าง 260 สูง 350 คงที่ */
+.mm-pop .leaflet-popup-content{width:260px!important;height:350px;margin:10px 12px;overflow:auto;font-family:inherit;font-size:.85rem}
+.mm-pop table{width:100%;border-collapse:collapse;font-size:.8rem}
+.mm-pop td{padding:2px 6px;border-bottom:1px solid #e2e6ee;text-align:left;white-space:normal;word-break:break-word}
+.mm-pop td:first-child{color:#6a7489;font-weight:600;white-space:nowrap}
+.mm-pop .mm-pick{margin:0 0 8px}
+.mm-pop .mm-pick small{display:block;margin-bottom:4px;color:#6a7489}
+.mm-pop .mm-pick button{display:inline-flex;align-items:center;gap:7px;padding:5px 14px 5px 10px;border:2px solid var(--zc);background:var(--zc);color:var(--zt);border-radius:99px;cursor:pointer;font:inherit;font-weight:700}
+.mm-pop .mm-pick button i{width:12px;height:12px;border-radius:50%;background:var(--zt)}
+.mm-pop .mm-none{margin:0 0 8px;font-size:.78rem;color:#dc2626}
