@@ -5,7 +5,7 @@
 /* popup ลอยทับหน้าหลัก */
 .mm-back{position:fixed;inset:0;z-index:10000;background:rgba(10,15,30,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .mm-back.hide{display:none}
-.mm-box{width:min(1000px,100%);height:min(720px,100%);background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.mm-box{width:min(1400px,100%);height:min(720px,100%);background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
 .mm-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd)}
 .mm-head h3{margin:0;font-size:1rem;flex:1}
 .mm-head button{border:0;background:var(--bg);color:var(--tx);width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer}
