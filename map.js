@@ -218,17 +218,24 @@
   /* ---------- สร้าง popup + แผนที่ ---------- */
   function build(){
     back=document.createElement("div");back.className="mm-back hide";
-    back.innerHTML='<div class="mm-box"><div class="mm-head"><h3>🗺️ เลือกโซนสีจากแผนที่</h3><button type="button" aria-label="ปิด">✕</button></div>'+
+    back.innerHTML='<div class="mm-box"><div class="mm-head"><h3>🗺️ เลือกโซนสีจากแผนที่</h3><button type="button" class="mm-fs" title="ขยายเต็มหน้า" aria-label="ขยายเต็มหน้า">⛶</button><button type="button" class="mm-x" aria-label="ปิด">✕</button></div>'+
       '<div class="mm-map"></div>'+
       '<p class="mm-warn"><b><i>* <u>อยู่ระหว่างศึกษา</u> รายละเอียดตามข้อกำหนดฉบับปิดประกาศ 15 วัน (28 พ.ย. – 12 ต.ค. 69)</i></b></p></div>';
     document.body.appendChild(back);
     box=back.firstChild;
-    box.querySelector(".mm-head button").onclick=close;
+    box.querySelector(".mm-x").onclick=close;
+    var fs=box.querySelector(".mm-fs");
+    fs.onclick=function(){   // สลับ เต็มหน้า ↔ ขนาดเริ่มต้น
+      var f=back.classList.toggle("full");
+      fs.textContent=f?"🗗":"⛶";
+      fs.title=f?"ย่อกลับขนาดเดิม":"ขยายเต็มหน้า";
+      setTimeout(function(){map.invalidateSize();},50);
+    };
     back.addEventListener("mousedown",function(e){if(e.target===back)close()});
     document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!back.classList.contains("hide"))close()});
-    map=L.map(box.querySelector(".mm-map"),{zoomControl:false}).setView([14.59,101.0],11);
-    var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
-    var sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri"});
+    map=L.map(box.querySelector(".mm-map"),{zoomControl:false,maxZoom:18}).setView([14.59,101.0],11);
+    var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
+    var sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"Esri"});
     map.layerCtl=L.control.layers({"แผนที่":osm,"ดาวเทียม":sat},{}).addTo(map);
     addSearch();                       // เพิ่มก่อน zoom control เพื่อให้อยู่ด้านบน
     L.control.zoom({position:"topleft"}).addTo(map);
