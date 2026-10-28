@@ -86,7 +86,7 @@
         if(t!=null&&t!=="")l.bindTooltip(String(t),{permanent:true,direction:"center",className:"mm-lbl"});
       }
     }).addTo(map);
-    map.layerCtl.addOverlay(layer,"ผังเมือง ("+FIELD+")");
+    map.layerCtl.addOverlay(layer,"ร่างผังเมืองรวม");
     loaded=true;
     fit();
     updLabels();
@@ -165,29 +165,64 @@
     searchLayer.clearLayers();
     var pt=L.latLng(lat,lng);
     L.marker(pt).addTo(searchLayer);
-    map.setView(pt,Math.max(map.getZoom(),17));
+    focusAt(pt,17);
+  }
+  /* ซูมไปที่จุด และถ้าจุดอยู่ในพื้นที่ของ feature ใดให้เปิด popup ของ feature นั้น */
+  function focusAt(pt,zoom){
+    map.setView(pt,Math.max(map.getZoom(),zoom));
     if(layer){
       var hit=null;
-      layer.eachLayer(function(l){if(!hit&&layerHas(l,lat,lng))hit=l});
+      layer.eachLayer(function(l){if(!hit&&layerHas(l,pt.lat,pt.lng))hit=l});
       if(hit)hit.openPopup(pt);
     }
+  }
+
+  /* ---------- ตำแหน่งปัจจุบัน (ปุ่มใต้ปุ่มซูมออก) ---------- */
+  var locLayer;
+  function addLocate(){
+    locLayer=L.layerGroup().addTo(map);
+    var C=L.Control.extend({options:{position:"topleft"},onAdd:function(){
+      var d=L.DomUtil.create("div","leaflet-bar leaflet-control"),
+          a=L.DomUtil.create("a","mm-loc",d);
+      a.href="#";a.setAttribute("role","button");a.title="แสดงตำแหน่งปัจจุบัน";a.setAttribute("aria-label","แสดงตำแหน่งปัจจุบัน");
+      a.textContent="𖦏";
+      a.onclick=function(e){
+        e.preventDefault();
+        if(!navigator.geolocation){alert("เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง");return;}
+        a.classList.add("busy");
+        navigator.geolocation.getCurrentPosition(function(pos){
+          a.classList.remove("busy");
+          var pt=L.latLng(pos.coords.latitude,pos.coords.longitude),acc=pos.coords.accuracy||0;
+          locLayer.clearLayers();
+          if(acc>0)L.circle(pt,{radius:acc,color:"#2563eb",weight:1,fillColor:"#2563eb",fillOpacity:.12,interactive:false}).addTo(locLayer);
+          L.circleMarker(pt,{radius:7,color:"#fff",weight:2,fillColor:"#2563eb",fillOpacity:1}).addTo(locLayer);
+          focusAt(pt,acc>300?15:17);
+        },function(err){
+          a.classList.remove("busy");
+          alert("ระบุตำแหน่งปัจจุบันไม่ได้: "+(err.code===1?"ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง":err.message||"ไม่ทราบสาเหตุ"));
+        },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+      };
+      L.DomEvent.disableClickPropagation(d);
+      return d;
+    }});
+    new C().addTo(map);
   }
   function addSearch(){
     searchLayer=L.layerGroup().addTo(map);
     var C=L.Control.extend({options:{position:"topleft"},onAdd:function(){
       var d=L.DomUtil.create("div","mm-search leaflet-bar");
-      d.innerHTML='<button type="button" class="tg" title="ย่อเครื่องมือค้นหา">◀</button>'+
-        '<div class="bd"><input type="text" inputmode="decimal" class="la" placeholder="lat" aria-label="Latitude">'+
+      d.innerHTML='<button type="button" class="tg" title="ย่อเครื่องมือค้นหา">ย่อ</button>'+
+        '<div class="bd"><div class="ins"><input type="text" inputmode="decimal" class="la" placeholder="lat" aria-label="Latitude">'+
         '<input type="text" inputmode="decimal" class="lo" placeholder="long" aria-label="Longitude">'+
-        '<input type="text" class="ll" placeholder="lat, long เช่น 14.59, 101.01" aria-label="lat, long">'+
-        '<button type="button" class="go" title="ค้นหา">🔍</button>'+
+        '<input type="text" class="ll" placeholder="lat, long เช่น 14.59, 101.01" aria-label="lat, long"></div>'+
+        '<div class="btns"><button type="button" class="go" title="ค้นหา">🔍</button>'+
         '<button type="button" class="sw" title="สลับ: แยก lat/long 2 ช่อง ↔ ช่องเดียว">⇄</button>'+
-        '<button type="button" class="clr" title="ล้างผลการค้นหา">✕</button></div>';
+        '<button type="button" class="clr" title="ล้างผลการค้นหา">💫ล้างผลค้นหา</button></div></div>';
       var ia=d.querySelector(".la"),io=d.querySelector(".lo"),il=d.querySelector(".ll");
       var tg=d.querySelector(".tg");
       tg.onclick=function(){   // ขยายอยู่: แสดง ◀ (กดเพื่อย่อ) · ย่ออยู่: แสดง 📍 (กดเพื่อขยาย)
         var c=d.classList.toggle("col");
-        tg.textContent=c?"📍":"◀";
+        tg.textContent=c?"📍":"ย่อ";
         tg.title=c?"ขยายเครื่องมือค้นหา":"ย่อเครื่องมือค้นหา";
       };
       function run(){
@@ -207,7 +242,7 @@
           d.classList.add("one");
         }
       };
-      d.querySelector(".clr").onclick=function(){ia.value="";io.value="";il.value="";searchLayer.clearLayers();map.closePopup();};
+      d.querySelector(".clr").onclick=function(){ia.value="";io.value="";il.value="";searchLayer.clearLayers();if(locLayer)locLayer.clearLayers();map.closePopup();};
       [ia,io,il].forEach(function(i){i.onkeydown=function(e){if(e.key==="Enter")run()}});
       L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
       return d;
@@ -239,6 +274,7 @@
     map.layerCtl=L.control.layers({"แผนที่":osm,"ดาวเทียม":sat},{}).addTo(map);
     addSearch();                       // เพิ่มก่อน zoom control เพื่อให้อยู่ด้านบน
     L.control.zoom({position:"topleft"}).addTo(map);
+    addLocate();                       // เพิ่มหลัง zoom control เพื่อให้อยู่ใต้ปุ่มซูมออก
     map.on("zoomend",updLabels);updLabels();
     built=true;
   }
